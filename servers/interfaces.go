@@ -558,9 +558,9 @@ func GetConnectionCount(param Params) map[string]interface{} {
 }
 
 func GetTransactionPool(param Params) map[string]interface{} {
-	txs := make([]*TransactionContextInfo, 0)
+	txs := make([]interface{}, 0)
 	for _, tx := range TxMemPool.GetTxsInPool() {
-		txs = append(txs, GetTransactionContextInfo(nil, tx))
+		txs = append(txs, common.ToReversedString(tx.Hash()))
 	}
 	return ResponsePack(Success, txs)
 }
@@ -675,7 +675,10 @@ func GetBlockByHash(param Params) map[string]interface{} {
 
 	verbosity, ok := param.Uint("verbosity")
 	if !ok {
-		verbosity = 1
+		verbosityBool, ok := param.Bool("verbosity")
+		if !ok || verbosityBool {
+			verbosity = 1
+		}
 	}
 
 	result, error := getBlock(hash, verbosity)

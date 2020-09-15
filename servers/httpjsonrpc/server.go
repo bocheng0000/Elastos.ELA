@@ -170,7 +170,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &request)
 	if err != nil {
-		log.Info("JSON-RPC request parsing error: ", err, "Try to unmarshal batches requests")
+		log.Info("JSON-RPC request parsing: ", err, "Try to unmarshal batches requests")
 
 		errArray := json.Unmarshal(body, &requestArray)
 		if errArray != nil {
