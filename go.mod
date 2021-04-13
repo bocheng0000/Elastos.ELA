@@ -10,6 +10,8 @@ require (
 	github.com/itchyny/base58-go v0.0.5
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/robfig/cron v1.2.0
 	github.com/rs/cors v1.7.0
 	github.com/stretchr/testify v1.4.0
 	github.com/syndtr/goleveldb v1.0.0
