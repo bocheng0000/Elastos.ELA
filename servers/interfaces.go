@@ -2672,6 +2672,64 @@ func VerifyAndSendTx(tx *Transaction) error {
 	return nil
 }
 
+type RPCTransaction struct {
+	Address common.Uint168 `json:"address"`
+	Txid    common.Uint256 `json:"txid"`
+	Action  string         `json:"action"`
+	Type    string         `json:"type"`
+	Amount  uint64         `json:"amount"`
+	Time    uint64         `json:"time"`
+	Fee     uint64         `json:"fee"`
+	Height  uint64         `json:"height"`
+	Memo    string         `json:"memo"`
+	Inputs  []string       `json:"inputs"`
+	Outputs []string       `json:"outputs"`
+}
+
+type RPCTransactionHistoryInfo struct {
+	TxHistory  interface{} `json:"txhistory"`
+	TotalCount uint64      `json:"totalcount"`
+}
+
+func GetHistory(param Params) map[string]interface{} {
+	address, ok := param.String("address")
+	if !ok {
+		return ResponsePack(InvalidParams, "")
+	}
+
+	_, err := common.Uint168FromAddress(address)
+	if err != nil {
+		return ResponsePack(InvalidParams, "invalid address, "+err.Error())
+	}
+
+	order, ok := param.String("order")
+	if ok {
+		if order != "asc" && order != "desc" {
+			return ResponsePack(InvalidParams, "")
+		}
+	} else {
+		order = "desc"
+	}
+	skip, ok := param.Uint("skip")
+	if !ok {
+		skip = 0
+	}
+	limit, ok := param.Uint("limit")
+	if !ok {
+		limit = 10
+	} else if limit > 50 {
+		return ResponsePack(InvalidParams, "invalid limit")
+	}
+
+	txHistory, txCount := blockchain.StoreEx.GetTxHistoryByLimit(address, order, skip, limit)
+
+	result := RPCTransactionHistoryInfo{
+		TxHistory:  txHistory,
+		TotalCount: uint64(txCount),
+	}
+	return ResponsePack(Success, result)
+}
+
 func ResponsePack(errCode ServerErrCode, result interface{}) map[string]interface{} {
 	if errCode != 0 && (result == "" || result == nil) {
 		result = ErrMap[errCode]
