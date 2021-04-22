@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-
+	
 	"github.com/elastos/Elastos.ELA/account"
 	aux "github.com/elastos/Elastos.ELA/auxpow"
 	"github.com/elastos/Elastos.ELA/blockchain"
@@ -2670,6 +2670,96 @@ func VerifyAndSendTx(tx *Transaction) error {
 	Server.RelayInventory(iv, tx)
 
 	return nil
+}
+
+type RPCTransaction struct {
+	Address common.Uint168 `json:"address"`
+	Txid    common.Uint256 `json:"txid"`
+	Action  string         `json:"action"`
+	Type    string         `json:"type"`
+	Amount  uint64         `json:"amount"`
+	Time    uint64         `json:"time"`
+	Fee     uint64         `json:"fee"`
+	Height  uint64         `json:"height"`
+	Memo    string         `json:"memo"`
+	Inputs  []string       `json:"inputs"`
+	Outputs []string       `json:"outputs"`
+}
+
+type RPCTransactionHistoryInfo struct {
+	TxSlice    []RPCTransaction `json:"txs"`
+	TotalCount uint64           `json:"totalcount"`
+}
+
+func GetHistory(param Params) map[string]interface{} {
+	address, ok := param.String("addr")
+	if !ok {
+		return ResponsePack(InvalidParams, "")
+	}
+
+	_, err := common.Uint168FromAddress(address)
+	if err != nil {
+		return ResponsePack(InvalidParams, "invalid address, "+err.Error())
+	}
+	//支持参数:	order: 查询顺序，默认值为desc降序,asc升序: desc降序
+	//		 	start: 开始位置，默认值为0，即从最新的记录开始
+	//			limit: 查询数量，默认值为10，最大值为100
+	//          verbose: 是否返回交易详情，默认为true；先实现verbose=true的情况
+	order, ok := param.String("order")
+	if ok {
+		if order != "asc" && order != "desc" {
+			return ResponsePack(InvalidParams, "")
+		}
+	}
+	skip, ok := param.Uint("skip")
+	if !ok {
+		skip = 0
+	}
+	limit, ok := param.Uint("limit")
+	if !ok {
+		limit = 10
+	}
+
+	//暂不考虑版本
+	//ver, _ := param.String("version")
+	//if !ok && !ok1 {
+	//	txhs := blockchain.DefaultChainStoreEx.GetTxHistory(addr, order, ver)
+	//	var len int
+	//	switch txhs.(type) {
+	//	case TransactionHistorySorter:
+	//		len = txhs.(types.TransactionHistorySorter).Len()
+	//	case TransactionHistorySorterDesc:
+	//		len = txhs.(types.TransactionHistorySorterDesc).Len()
+	//	}
+	//	thr := types.ThResult{
+	//		History:  txhs,
+	//		TotalNum: len,
+	//	}
+	//	return ResponsePackEx(ELEPHANT_SUCCESS, thr)
+	//} else if ok && ok1 {
+	//	pageNum, cool := param.Uint("pageNum")
+	//	if !cool {
+	//		return ResponsePackEx(ELEPHANT_ERR_BAD_REQUEST, "")
+	//	}
+	//	pageSize, cool := param.Uint("pageSize")
+	//	if !cool {
+	//		return ResponsePackEx(ELEPHANT_ERR_BAD_REQUEST, "")
+	//	}
+	//	txhs, total := blockchain2.DefaultChainStoreEx.GetTxHistoryByLimit(addr, order, ver, pageNum, pageSize)
+	//	thr := types.ThResult{
+	//		History:  txhs,
+	//		TotalNum: total,
+	//	}
+	//	return ResponsePackEx(ELEPHANT_SUCCESS, thr)
+	//}
+	//return ResponsePackEx(ELEPHANT_ERR_BAD_REQUEST, "")
+	txHistory, txCount := blockchain.StoreEx.GetTxHistoryByLimit(address, order, skip, limit)
+
+	result := &RPCTransactionHistoryInfo{
+		TxSlice: txHistory,
+		TotalCount: uint64(txCount),
+	}
+	return ResponsePack(Success, result)
 }
 
 func ResponsePack(errCode ServerErrCode, result interface{}) map[string]interface{} {
