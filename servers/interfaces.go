@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	
+
 	"github.com/elastos/Elastos.ELA/account"
 	aux "github.com/elastos/Elastos.ELA/auxpow"
 	"github.com/elastos/Elastos.ELA/blockchain"
