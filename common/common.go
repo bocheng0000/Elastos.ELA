@@ -17,7 +17,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/elastos/Elastos.ELA/core/contract"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -100,21 +99,21 @@ func ReverseHexString(s string) (string, error) {
 	return BytesToHexString(b), nil
 }
 
-func GetProgramHash(public []byte) (*Uint168, error) {
-	hash, err := contract.PublicKeyToStandardProgramHash(public)
-	if err != nil {
-		return nil, err
-	}
-	return hash, nil
-}
+//func GetProgramHash(public []byte) (*Uint168, error) {
+//	hash, err := contract.PublicKeyToStandardProgramHash(public)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return hash, nil
+//}
 
-func GetAddress(public []byte) (string, error) {
-	hash, err := GetProgramHash(public)
-	if err != nil {
-		return "", err
-	}
-	return hash.ToAddress()
-}
+//func GetAddress(public []byte) (string, error) {
+//	hash, err := GetProgramHash(public)
+//	if err != nil {
+//		return "", err
+//	}
+//	return hash.ToAddress()
+//}
 
 func ContainsU168(c Uint168, s []Uint168) bool {
 	for _, v := range s {

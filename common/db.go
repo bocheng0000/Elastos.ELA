@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/elastos/Elastos.ELA/common/log"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -158,14 +157,14 @@ func InitDb(db *Dba) error {
 
 	r, err := db.Query(`SELECT name FROM sqlite_master WHERE name=?`, "chain_cr_candidate_info")
 	if err != nil {
-		log.Fatalf("Error Init db %s", err.Error())
+		//log.Fatalf("Error Init db %s", err.Error())
 		return err
 	}
 	if !r.Next() {
 		for _, v := range createTableSqlStmtArr {
 			_, err := db.Exec(v)
 			if err != nil {
-				log.Infof("Error execute sql : %s \n", err.Error())
+				//log.Infof("Error execute sql : %s \n", err.Error())
 				return err
 			}
 		}

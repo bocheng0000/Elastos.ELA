@@ -2687,7 +2687,8 @@ type RPCTransaction struct {
 }
 
 type RPCTransactionHistoryInfo struct {
-	TxSlice    []RPCTransaction `json:"txs"`
+	//TxSlice    []RPCTransaction `json:"txs"`
+	TxSlice    interface{} `json:"txs"`
 	TotalCount uint64           `json:"totalcount"`
 }
 
@@ -2755,7 +2756,7 @@ func GetHistory(param Params) map[string]interface{} {
 	//return ResponsePackEx(ELEPHANT_ERR_BAD_REQUEST, "")
 	txHistory, txCount := blockchain.StoreEx.GetTxHistoryByLimit(address, order, skip, limit)
 
-	result := &RPCTransactionHistoryInfo{
+	result := RPCTransactionHistoryInfo{
 		TxSlice: txHistory,
 		TotalCount: uint64(txCount),
 	}

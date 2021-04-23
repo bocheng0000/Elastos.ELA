@@ -40,9 +40,9 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 	}
 	m.l.RUnlock()
 	txhs := make([]TransactionHistory, 0)
-	var signedAddress string
+	//var signedAddress string
 	//var node_fee common.Fixed64
-	var node_output_index uint64 = 999999
+	//var node_output_index uint64 = 999999
 	var memo []byte
 	var tx_type = tx.TxType
 	for _, attr := range tx.Attributes {
@@ -92,11 +92,13 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 								log.Infof("Error verify postmark data %s", hex.EncodeToString(attr.Data))
 								continue
 							}
+							/*
 							signedAddress, err = common.GetAddress(b_pub)
 							if err != nil {
 								log.Infof("Error Getting signed address from postmark %s", hex.EncodeToString(attr.Data))
 								continue
 							}
+							*/
 						} else {
 							log.Infof("Invalid postmark data %s", hex.EncodeToString(attr.Data))
 							continue
@@ -147,7 +149,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 	}
 	receive := make(map[common.Uint168]int64)
 	var totalOutput int64 = 0
-	for i, output := range tx.Outputs {
+	for _, output := range tx.Outputs {
 		address, _ := output.ProgramHash.ToAddress()
 		var valueCross int64
 		if isCrossTx == true && (output.ProgramHash == MINING_ADDR || strings.Index(address, "X") == 0 || address == "4oLvT2") {
@@ -170,13 +172,13 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		if !common.ContainsU168(output.ProgramHash, to) {
 			to = append(to, output.ProgramHash)
 		}
-		if signedAddress != "" {
-			outputAddress, _ := output.ProgramHash.ToAddress()
-			if signedAddress == outputAddress {
-				//node_fee = output.Value
-				node_output_index = uint64(i)
-			}
-		}
+		//if signedAddress != "" {
+		//	outputAddress, _ := output.ProgramHash.ToAddress()
+		//	if signedAddress == outputAddress {
+		//		//node_fee = output.Value
+		//		node_output_index = uint64(i)
+		//	}
+		//}
 	}
 	fee := totalInput - totalOutput
 	for k, r := range receive {
@@ -216,7 +218,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		txh.Type = []byte(transferType)
 		txh.Fee = realFee
 		//txh.NodeFee = uint64(node_fee)
-		txh.NodeOutputIndex = uint64(node_output_index)
+		//txh.NodeOutputIndex = uint64(node_output_index)
 		if len(rto) > 10 {
 			txh.Outputs = rto[0:10]
 		} else {
@@ -239,7 +241,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		txh.Type = []byte(SENT)
 		txh.Fee = uint64(fee)
 		//txh.NodeFee = uint64(node_fee)
-		txh.NodeOutputIndex = uint64(node_output_index)
+		//txh.NodeOutputIndex = uint64(node_output_index)
 		if len(to) > 10 {
 			txh.Outputs = to[0:10]
 		} else {
