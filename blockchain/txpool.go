@@ -208,7 +208,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		}
 
 		txh := TransactionHistory{}
-		txh.Value = uint64(value)
+		txh.Value = common.Fixed64(value)
 		txh.Address = k
 		txh.Inputs = from
 		txh.TxType = tx_type
@@ -231,7 +231,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 
 	for k, r := range spend {
 		txh := TransactionHistory{}
-		txh.Value = uint64(r)
+		txh.Value = common.Fixed64(r)
 		txh.Address = k
 		txh.Inputs = []common.Uint168{k}
 		txh.TxType = tx_type
