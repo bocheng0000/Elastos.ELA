@@ -2721,6 +2721,8 @@ func GetHistory(param Params) map[string]interface{} {
 	limit, ok := param.Uint("limit")
 	if !ok {
 		limit = 10
+	} else if limit > 50 {
+			return ResponsePack(InvalidParams, "invalid limit")
 	}
 
 	//暂不考虑版本
