@@ -2693,7 +2693,7 @@ type RPCTransactionHistoryInfo struct {
 }
 
 func GetHistory(param Params) map[string]interface{} {
-	address, ok := param.String("addr")
+	address, ok := param.String("address")
 	if !ok {
 		return ResponsePack(InvalidParams, "")
 	}
@@ -2711,6 +2711,8 @@ func GetHistory(param Params) map[string]interface{} {
 		if order != "asc" && order != "desc" {
 			return ResponsePack(InvalidParams, "")
 		}
+	} else {
+		order = "desc"
 	}
 	skip, ok := param.Uint("skip")
 	if !ok {
