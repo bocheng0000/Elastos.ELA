@@ -61,7 +61,7 @@ type TransactionHistory struct {
 	Address         common.Uint168
 	Txid            common.Uint256
 	Type            []byte
-	Value           uint64
+	Value           common.Fixed64
 	CreateTime      uint64
 	Height          uint64
 	Fee             uint64
@@ -78,7 +78,7 @@ type TransactionHistoryDisplay struct {
 	Address         string
 	Txid            string
 	Type            string
-	Value           uint64
+	Value           string
 	CreateTime      uint64
 	Height          uint64
 	Fee             uint64
@@ -110,7 +110,8 @@ func (th *TransactionHistory) Serialize(w io.Writer) error {
 	if err != nil {
 		return errors.New("[TransactionHistory], Type serialize failed.")
 	}
-	err = common.WriteUint64(w, th.Value)
+	//err = common.WriteUint64(w, th.Value)
+	err = th.Value.Serialize(w)
 	if err != nil {
 		return errors.New("[TransactionHistory], Value serialize failed.")
 	}
@@ -192,8 +193,9 @@ func (th *TransactionHistory) Deserialize(r io.Reader) (*TransactionHistoryDispl
 	if err != nil {
 		return txhd, errors.New("[TransactionHistory], Type deserialize failed.")
 	}
-	th.Value, err = common.ReadUint64(r)
-	txhd.Value = th.Value
+	//th.Value, err = common.ReadUint64(r)
+	err = th.Value.Deserialize(r)
+	txhd.Value = th.Value.String()
 	if err != nil {
 		return txhd, errors.New("[TransactionHistory], Value deserialize failed.")
 	}

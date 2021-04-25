@@ -699,7 +699,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 
 			if txType == CoinBase {
 				var to []Uint168
-				hold := make(map[Uint168]uint64)
+				hold := make(map[Uint168]Fixed64)
 				txhsCoinBase := make([]TransactionHistory, 0)
 				//for i, vout := range tx.Outputs {
 				for _, vout := range tx.Outputs {
@@ -718,10 +718,10 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 
 						//txh.NodeFee = 0
 						//txh.NodeOutputIndex = uint64(node_output_index)
-						hold[vout.ProgramHash] = uint64(vout.Value)
+						hold[vout.ProgramHash] = vout.Value
 						txhsCoinBase = append(txhsCoinBase, txh)
 					} else {
-						hold[vout.ProgramHash] += uint64(vout.Value)
+						hold[vout.ProgramHash] += vout.Value
 					}
 					//todo: remove, dpos reward
 					//if i > 1 {
@@ -750,7 +750,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 				if voteTxHolder[txid] == DPoS || voteTxHolder[txid] == CRC || voteTxHolder[txid] == DPoSAndCRC {
 					txType = voteTxHolder[txid]
 				}
-				spend := make(map[Uint168]int64)
+				spend := make(map[Uint168]Fixed64)
 				var totalInput int64 = 0
 				var fromAddress []Uint168
 				var toAddress []Uint168
@@ -765,15 +765,15 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					totalInput += int64(referTx.Outputs[index].Value)
 					v, ok := spend[address]
 					if ok {
-						spend[address] = v + int64(referTx.Outputs[index].Value)
+						spend[address] = v + Fixed64(referTx.Outputs[index].Value)
 					} else {
-						spend[address] = int64(referTx.Outputs[index].Value)
+						spend[address] = Fixed64(referTx.Outputs[index].Value)
 					}
 					if !ContainsU168(address, fromAddress) {
 						fromAddress = append(fromAddress, address)
 					}
 				}
-				receive := make(map[Uint168]int64)
+				receive := make(map[Uint168]Fixed64)
 				var totalOutput int64 = 0
 				for _, output := range tx.Outputs {
 					address, _ := output.ProgramHash.ToAddress()
@@ -791,9 +791,9 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					}
 					v, ok := receive[output.ProgramHash]
 					if ok {
-						receive[output.ProgramHash] = v + int64(output.Value)
+						receive[output.ProgramHash] = v + Fixed64(output.Value)
 					} else {
-						receive[output.ProgramHash] = int64(output.Value)
+						receive[output.ProgramHash] = Fixed64(output.Value)
 					}
 					if !ContainsU168(output.ProgramHash, toAddress) {
 						toAddress = append(toAddress, output.ProgramHash)
@@ -810,7 +810,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 				for addressReceiver, valueReceived := range receive {
 					transferType := RECEIVED
 					valueSpent, ok := spend[addressReceiver]
-					var txValue int64
+					var txValue Fixed64
 					if ok {
 						if valueSpent > valueReceived {
 							txValue = valueSpent - valueReceived
@@ -834,7 +834,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					}
 
 					txh := TransactionHistory{}
-					txh.Value = uint64(txValue)
+					txh.Value = Fixed64(txValue)
 					txh.Address = addressReceiver
 					txh.Inputs = fromAddress
 					txh.TxType = txType
@@ -856,7 +856,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 
 				for k, r := range spend {
 					txh := TransactionHistory{}
-					txh.Value = uint64(r)
+					txh.Value = Fixed64(r)
 					txh.Address = k
 					txh.Inputs = []Uint168{k}
 					txh.TxType = txType
