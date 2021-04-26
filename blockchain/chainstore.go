@@ -959,7 +959,7 @@ func (c *ChainStoreExtend) GetTxHistory(addr string, order string) interface{} {
 		//if txhd.Type == "sent" {
 		//	txhd.Fee = txhd.Fee + uint64(*txhd.NodeFee)
 		//}
-		txhd.TxType = strings.ToLower(txhd.TxType[0:1]) + txhd.TxType[1:]
+		txhd.TxType = strings.ToLower(txhd.TxType)
 
 		if order == "desc" {
 			txhs = append(txhs.(TransactionHistorySorterDesc), *txhd)
