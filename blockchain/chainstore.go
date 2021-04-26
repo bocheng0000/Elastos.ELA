@@ -970,7 +970,7 @@ func (c *ChainStoreExtend) GetTxHistory(addr string, order string) interface{} {
 
 	txInMempool := MemPoolEx.GetMemPoolTx(programHash)
 	for _, txh := range txInMempool {
-		txh.TxType = strings.ToLower(txh.TxType[0:1]) + txh.TxType[1:]
+		txh.TxType = strings.ToLower(txh.TxType)
 		//txh.Fee = txh.Fee + uint64(*txh.NodeFee)
 
 		if order == "desc" {
