@@ -175,7 +175,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		//if signedAddress != "" {
 		//	outputAddress, _ := output.ProgramHash.ToAddress()
 		//	if signedAddress == outputAddress {
-		//		//node_fee = output.Value
+		//		//node_fee = output.Amount
 		//		node_output_index = uint64(i)
 		//	}
 		//}
@@ -196,7 +196,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		} else {
 			value = r
 		}
-		var realFee uint64 = uint64(fee)
+		var realFee = common.Fixed64(fee)
 		var rto = to
 		if transferType == RECEIVED {
 			realFee = 0
@@ -214,7 +214,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		txh.TxType = tx_type
 		txh.Txid = tx.Hash()
 		txh.Height = 0
-		txh.CreateTime = 0
+		txh.Time = 0
 		txh.Type = []byte(transferType)
 		txh.Fee = realFee
 		//txh.NodeFee = uint64(node_fee)
@@ -237,9 +237,9 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		txh.TxType = tx_type
 		txh.Txid = tx.Hash()
 		txh.Height = 0
-		txh.CreateTime = 0
+		txh.Time = 0
 		txh.Type = []byte(SENT)
-		txh.Fee = uint64(fee)
+		txh.Fee = common.Fixed64(fee)
 		//txh.NodeFee = uint64(node_fee)
 		//txh.NodeOutputIndex = uint64(node_output_index)
 		if len(to) > 10 {

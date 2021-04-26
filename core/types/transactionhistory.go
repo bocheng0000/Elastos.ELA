@@ -58,37 +58,33 @@ var TxTypeEnum = map[TxType]string{
 }
 
 type TransactionHistory struct {
-	Address         common.Uint168
-	Txid            common.Uint256
-	Type            []byte
-	Value           common.Fixed64
-	CreateTime      uint64
-	Height          uint64
-	Fee             uint64
-	Inputs          []common.Uint168
-	Outputs         []common.Uint168
-	TxType          TxType
-	Memo            []byte
-	//NodeOutputIndex uint64
-	//NodeFee         uint64
+	Address common.Uint168
+	Txid    common.Uint256
+	Type    []byte
+	Value   common.Fixed64
+	Time    uint64
+	Height  uint64
+	Fee     common.Fixed64
+	Inputs  []common.Uint168
+	Outputs []common.Uint168
+	TxType  TxType
+	Memo    []byte
 	Status          uint64
 }
 
 type TransactionHistoryDisplay struct {
-	Address         string
-	Txid            string
-	Type            string
-	Value           string
-	CreateTime      uint64
-	Height          uint64
-	Fee             uint64
-	Inputs          []string
-	Outputs         []string
-	TxType          string
-	Memo            string
-	//NodeOutputIndex *int64 `json:",omitempty"`
-	//NodeFee         *int64 `json:",omitempty"`
-	Status          string `json:",omitempty"`
+	Address string   `json:"address"`
+	Txid    string   `json:"txid"`
+	Type    string   `json:"type"`
+	Value   string   `json:"value"`
+	Time    uint64   `json:"time"`
+	Height  uint64   `json:"height"`
+	Fee     string   `json:"fee"`
+	Inputs  []string `json:"inputs"`
+	Outputs []string `json:"outputs"`
+	TxType  string   `json:"txtype"`
+	Memo    string   `json:"memo"`
+	Status  string   `json:",omitempty"`
 }
 
 //type ThResult struct {
@@ -110,20 +106,21 @@ func (th *TransactionHistory) Serialize(w io.Writer) error {
 	if err != nil {
 		return errors.New("[TransactionHistory], Type serialize failed.")
 	}
-	//err = common.WriteUint64(w, th.Value)
+	//err = common.WriteUint64(w, th.Amount)
 	err = th.Value.Serialize(w)
 	if err != nil {
-		return errors.New("[TransactionHistory], Value serialize failed.")
+		return errors.New("[TransactionHistory], Amount serialize failed.")
 	}
-	err = common.WriteUint64(w, th.CreateTime)
+	err = common.WriteUint64(w, th.Time)
 	if err != nil {
-		return errors.New("[TransactionHistory], CreateTime serialize failed.")
+		return errors.New("[TransactionHistory], Time serialize failed.")
 	}
 	err = common.WriteUint64(w, th.Height)
 	if err != nil {
 		return errors.New("[TransactionHistory], Height serialize failed.")
 	}
-	err = common.WriteUint64(w, th.Fee)
+	//err = common.WriteUint64(w, th.Fee)
+	err = th.Fee.Serialize(w)
 	if err != nil {
 		return errors.New("[TransactionHistory], Fee serialize failed.")
 	}
@@ -193,24 +190,25 @@ func (th *TransactionHistory) Deserialize(r io.Reader) (*TransactionHistoryDispl
 	if err != nil {
 		return txhd, errors.New("[TransactionHistory], Type deserialize failed.")
 	}
-	//th.Value, err = common.ReadUint64(r)
+	//th.Amount, err = common.ReadUint64(r)
 	err = th.Value.Deserialize(r)
 	txhd.Value = th.Value.String()
 	if err != nil {
-		return txhd, errors.New("[TransactionHistory], Value deserialize failed.")
+		return txhd, errors.New("[TransactionHistory], Amount deserialize failed.")
 	}
-	th.CreateTime, err = common.ReadUint64(r)
-	txhd.CreateTime = th.CreateTime
+	th.Time, err = common.ReadUint64(r)
+	txhd.Time = th.Time
 	if err != nil {
-		return txhd, errors.New("[TransactionHistory], CreateTime deserialize failed.")
+		return txhd, errors.New("[TransactionHistory], Time deserialize failed.")
 	}
 	th.Height, err = common.ReadUint64(r)
 	txhd.Height = th.Height
 	if err != nil {
 		return txhd, errors.New("[TransactionHistory], Height deserialize failed.")
 	}
-	th.Fee, err = common.ReadUint64(r)
-	txhd.Fee = th.Fee
+	//th.Fee, err = common.ReadUint64(r)
+	err = th.Fee.Deserialize(r)
+	txhd.Fee = th.Fee.String()
 	if err != nil {
 		return txhd, errors.New("[TransactionHistory], Fee deserialize failed.")
 	}

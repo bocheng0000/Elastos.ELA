@@ -424,7 +424,7 @@ func doProcessVote(block *Block, voteTxHolder *map[string]TxType) error {
 					}
 					contents := payload.Contents
 					//voteVersion := payload.Version
-					//value := v.Value.String()
+					//value := v.Amount.String()
 					//address, err := v.ProgramHash.ToAddress()
 					//if err != nil {
 					//	return err
@@ -655,7 +655,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 				//				orgMsg += "&"
 				//				for i, output := range tx.Outputs {
 				//					address, _ := output.ProgramHash.ToAddress()
-				//					orgMsg += address + "-" + fmt.Sprintf("%d", output.Value)
+				//					orgMsg += address + "-" + fmt.Sprintf("%d", output.Amount)
 				//					if i != len(tx.Outputs)-1 {
 				//						orgMsg += ";"
 				//					}
@@ -709,7 +709,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 						txh.Address = vout.ProgramHash
 						txh.Txid = tx.Hash()
 						txh.Type = []byte(RECEIVED)
-						txh.CreateTime = uint64(block.Header.Timestamp)
+						txh.Time = uint64(block.Header.Timestamp)
 						txh.Height = uint64(block.Height)
 						txh.Fee = 0
 						txh.Inputs = []Uint168{MINING_ADDR}
@@ -725,7 +725,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					}
 					//todo: remove, dpos reward
 					//if i > 1 {
-					//	dposReward[vout.ProgramHash] = vout.Value
+					//	dposReward[vout.ProgramHash] = vout.Amount
 					//}
 				}
 				for i := 0; i < len(txhsCoinBase); i++ {
@@ -801,7 +801,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					//if signedAddress != "" {
 					//	outputAddress, _ := output.ProgramHash.ToAddress()
 					//	if signedAddress == outputAddress {
-					//		//node_fee = output.Value
+					//		//node_fee = output.Amount
 					//		node_output_index = uint64(i)
 					//	}
 					//}
@@ -834,15 +834,15 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					}
 
 					txh := TransactionHistory{}
-					txh.Value = Fixed64(txValue)
+					txh.Value = txValue
 					txh.Address = addressReceiver
 					txh.Inputs = fromAddress
 					txh.TxType = txType
 					txh.Txid = tx.Hash()
 					txh.Height = uint64(block.Height)
-					txh.CreateTime = uint64(block.Header.Timestamp)
+					txh.Time = uint64(block.Header.Timestamp)
 					txh.Type = []byte(transferType)
-					txh.Fee = realFee
+					txh.Fee = Fixed64(realFee)
 					//txh.NodeFee = uint64(node_fee)
 					//txh.NodeOutputIndex = uint64(node_output_index)
 					if len(txOutput) > 10 {
@@ -862,9 +862,9 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					txh.TxType = txType
 					txh.Txid = tx.Hash()
 					txh.Height = uint64(block.Height)
-					txh.CreateTime = uint64(block.Header.Timestamp)
+					txh.Time = uint64(block.Header.Timestamp)
 					txh.Type = []byte(SENT)
-					txh.Fee = uint64(fee)
+					txh.Fee = Fixed64(fee)
 					//txh.NodeFee = uint64(node_fee)
 					//txh.NodeOutputIndex = uint64(node_output_index)
 					if len(toAddress) > 10 {

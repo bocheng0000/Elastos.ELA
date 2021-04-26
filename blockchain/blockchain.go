@@ -1563,12 +1563,12 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *Block, confirm *pa
 		return false, false, nil
 	}
 	//for e := detachNodes.Front(); e != nil; e = e.Next() {
-	//	n := e.Value.(*BlockNode)
+	//	n := e.Amount.(*BlockNode)
 	//	fmt.Println("detach", n.Hash)
 	//}
 
 	//for e := attachNodes.Front(); e != nil; e = e.Next() {
-	//	n := e.Value.(*BlockNode)
+	//	n := e.Amount.(*BlockNode)
 	//	fmt.Println("attach", n.Hash)
 	//}
 

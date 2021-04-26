@@ -2688,8 +2688,8 @@ type RPCTransaction struct {
 
 type RPCTransactionHistoryInfo struct {
 	//TxSlice    []RPCTransaction `json:"txs"`
-	TxSlice    interface{} `json:"txs"`
-	TotalCount uint64           `json:"totalcount"`
+	TxHistory  interface{} `json:"txhistory"`
+	TotalCount uint64      `json:"totalcount"`
 }
 
 func GetHistory(param Params) map[string]interface{} {
@@ -2722,7 +2722,7 @@ func GetHistory(param Params) map[string]interface{} {
 	if !ok {
 		limit = 10
 	} else if limit > 50 {
-			return ResponsePack(InvalidParams, "invalid limit")
+		return ResponsePack(InvalidParams, "invalid limit")
 	}
 
 	//暂不考虑版本
@@ -2761,7 +2761,7 @@ func GetHistory(param Params) map[string]interface{} {
 	txHistory, txCount := blockchain.StoreEx.GetTxHistoryByLimit(address, order, skip, limit)
 
 	result := RPCTransactionHistoryInfo{
-		TxSlice: txHistory,
+		TxHistory:  txHistory,
 		TotalCount: uint64(txCount),
 	}
 	return ResponsePack(Success, result)
