@@ -69,7 +69,7 @@ type TransactionHistory struct {
 	Outputs []common.Uint168
 	TxType  TxType
 	Memo    []byte
-	Status          uint64
+	Status  uint64
 }
 
 type TransactionHistoryDisplay struct {
@@ -87,12 +87,6 @@ type TransactionHistoryDisplay struct {
 	Status  string   `json:",omitempty"`
 }
 
-//type ThResult struct {
-//	History  interface{}
-//	TotalNum int
-//}
-//TODO: modify the data structure: 1. remove node fee
-//TODO: 1.修改数据结构 2.修改数据读写操作
 func (th *TransactionHistory) Serialize(w io.Writer) error {
 	err := common.WriteVarBytes(w, th.Address.Bytes())
 	if err != nil {
@@ -152,14 +146,6 @@ func (th *TransactionHistory) Serialize(w io.Writer) error {
 	if err != nil {
 		return errors.New("[TransactionHistory], Memo serialize failed.")
 	}
-	//err = common.WriteUint64(w, th.NodeOutputIndex)
-	//if err != nil {
-	//	return errors.New("[TransactionHistory], NodeOutputIndex serialize failed.")
-	//}
-	//err = common.WriteUint64(w, th.NodeFee)
-	//if err != nil {
-	//	return errors.New("[TransactionHistory], NodeFee serialize failed.")
-	//}
 	err = common.WriteUint64(w, th.Status)
 	if err != nil {
 		return errors.New("[TransactionHistory], Status serialize failed.")
@@ -177,7 +163,6 @@ func (th *TransactionHistory) Deserialize(r io.Reader) (*TransactionHistoryDispl
 	th.Address.Deserialize(bytes.NewBuffer(buf))
 	txhd.Address, _ = th.Address.ToAddress()
 
-	//err = th.Txid.Deserialize(r)
 	buf, err = common.ReadVarBytes(r, 1024, "txid")
 	if err != nil {
 		return txhd, errors.New("[TransactionHistory], Txid deserialize failed.")
@@ -190,7 +175,6 @@ func (th *TransactionHistory) Deserialize(r io.Reader) (*TransactionHistoryDispl
 	if err != nil {
 		return txhd, errors.New("[TransactionHistory], Type deserialize failed.")
 	}
-	//th.Amount, err = common.ReadUint64(r)
 	err = th.Value.Deserialize(r)
 	txhd.Value = th.Value.String()
 	if err != nil {
@@ -206,7 +190,6 @@ func (th *TransactionHistory) Deserialize(r io.Reader) (*TransactionHistoryDispl
 	if err != nil {
 		return txhd, errors.New("[TransactionHistory], Height deserialize failed.")
 	}
-	//th.Fee, err = common.ReadUint64(r)
 	err = th.Fee.Deserialize(r)
 	txhd.Fee = th.Fee.String()
 	if err != nil {
@@ -254,29 +237,6 @@ func (th *TransactionHistory) Deserialize(r io.Reader) (*TransactionHistoryDispl
 		return txhd, errors.New("[TransactionHistory], Memo serialize failed.")
 	}
 
-	//th.NodeOutputIndex, err = common.ReadUint64(r)
-	//var inf int64 = 0
-	//var inoi int64 = -1
-	//if err != nil {
-	//	//txhd.NodeFee = &inf
-	//	//txhd.NodeOutputIndex = &inoi
-	//	txhd.Status = "confirmed"
-	//	return txhd, nil
-	//}
-	//if th.NodeOutputIndex == 999999 {
-	//	txhd.NodeOutputIndex = &inoi
-	//} else {
-	//	var idx = int64(th.NodeOutputIndex)
-	//	txhd.NodeOutputIndex = &idx
-	//}
-
-	//th.NodeFee, err = common.ReadUint64(r)
-	//var nf = int64(th.NodeFee)
-	//txhd.NodeFee = &nf
-	//if err != nil {
-	//	return txhd, errors.New("[TransactionHistory], NodeFee deserialize failed.")
-	//}
-
 	th.Status, err = common.ReadUint64(r)
 	if err != nil {
 		txhd.Status = "confirmed"
@@ -319,7 +279,6 @@ func (a TransactionHistorySorterDesc) Less(i, j int) bool {
 	return a[i].Height > a[j].Height
 }
 
-//func (a TransactionHistorySorter) Filter(from, size uint32) TransactionHistorySorter {
 func (a TransactionHistorySorter) Filter(skip, limit uint32) TransactionHistorySorter {
 	rst := TransactionHistorySorter{}
 	for i, v := range a {
@@ -334,7 +293,6 @@ func (a TransactionHistorySorter) Filter(skip, limit uint32) TransactionHistoryS
 	return rst
 }
 
-//func (a TransactionHistorySorterDesc) Filter(from, size uint32) TransactionHistorySorterDesc {
 func (a TransactionHistorySorterDesc) Filter(skip, limit uint32) TransactionHistorySorterDesc {
 	rst := TransactionHistorySorterDesc{}
 	for i, v := range a {

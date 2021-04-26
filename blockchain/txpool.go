@@ -2,9 +2,6 @@ package blockchain
 
 import (
 	"bytes"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,7 +11,6 @@ import (
 	. "github.com/elastos/Elastos.ELA/core/types"
 	"github.com/elastos/Elastos.ELA/core/types/outputpayload"
 	"github.com/elastos/Elastos.ELA/core/types/payload"
-	"github.com/elastos/Elastos.ELA/crypto"
 )
 
 var MemPoolEx MemPool
@@ -40,89 +36,26 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 	}
 	m.l.RUnlock()
 	txhs := make([]TransactionHistory, 0)
-	//var signedAddress string
-	//var node_fee common.Fixed64
-	//var node_output_index uint64 = 999999
+
 	var memo []byte
-	var tx_type = tx.TxType
+	var txType = tx.TxType
 	for _, attr := range tx.Attributes {
 		if attr.Usage == Memo {
 			memo = attr.Data
 		}
-		if attr.Usage == Description {
-			am := make(map[string]interface{})
-			err := json.Unmarshal(attr.Data, &am)
-			if err == nil {
-				pm, ok := am["Postmark"]
-				if ok {
-					dpm, ok := pm.(map[string]interface{})
-					if ok {
-						var orgMsg string
-						for i, input := range tx.Inputs {
-							hash := input.Previous.TxID
-							orgMsg += common.BytesToHexString(common.BytesReverse(hash[:])) + "-" + strconv.Itoa(int(input.Previous.Index))
-							if i != len(tx.Inputs)-1 {
-								orgMsg += ";"
-							}
-						}
-						orgMsg += "&"
-						for i, output := range tx.Outputs {
-							address, _ := output.ProgramHash.ToAddress()
-							orgMsg += address + "-" + fmt.Sprintf("%d", output.Value)
-							if i != len(tx.Outputs)-1 {
-								orgMsg += ";"
-							}
-						}
-						orgMsg += "&"
-						orgMsg += fmt.Sprintf("%d", tx.Fee)
-						log.Debugf("origin debug %s ", orgMsg)
-						pub, ok_pub := dpm["pub"].(string)
-						sig, ok_sig := dpm["signature"].(string)
-						b_msg := []byte(orgMsg)
-						b_pub, ok_b_pub := hex.DecodeString(pub)
-						b_sig, ok_b_sig := hex.DecodeString(sig)
-						if ok_pub && ok_sig && ok_b_pub == nil && ok_b_sig == nil {
-							pubKey, err := crypto.DecodePoint(b_pub)
-							if err != nil {
-								log.Infof("Error deserialise pubkey from postmark data %s", hex.EncodeToString(attr.Data))
-								continue
-							}
-							err = crypto.Verify(*pubKey, b_msg, b_sig)
-							if err != nil {
-								log.Infof("Error verify postmark data %s", hex.EncodeToString(attr.Data))
-								continue
-							}
-							/*
-							signedAddress, err = common.GetAddress(b_pub)
-							if err != nil {
-								log.Infof("Error Getting signed address from postmark %s", hex.EncodeToString(attr.Data))
-								continue
-							}
-							*/
-						} else {
-							log.Infof("Invalid postmark data %s", hex.EncodeToString(attr.Data))
-							continue
-						}
-					} else {
-						log.Infof("Invalid postmark data %s", hex.EncodeToString(attr.Data))
-						continue
-					}
-				}
-			}
-		}
 	}
 
 	isCrossTx := false
-	if tx_type == TransferCrossChainAsset {
+	if txType == TransferCrossChainAsset {
 		isCrossTx = true
 	}
 	judge := m.isVoteTx(tx)
 	if judge == 1 {
-		tx_type = DPoS
+		txType = DPoS
 	} else if judge == 2 {
-		tx_type = CRC
+		txType = CRC
 	} else if judge == 3 {
-		tx_type = DPoSAndCRC
+		txType = DPoSAndCRC
 	}
 	spend := make(map[common.Uint168]int64)
 	var totalInput int64 = 0
@@ -172,13 +105,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		if !common.ContainsU168(output.ProgramHash, to) {
 			to = append(to, output.ProgramHash)
 		}
-		//if signedAddress != "" {
-		//	outputAddress, _ := output.ProgramHash.ToAddress()
-		//	if signedAddress == outputAddress {
-		//		//node_fee = output.Amount
-		//		node_output_index = uint64(i)
-		//	}
-		//}
+
 	}
 	fee := totalInput - totalOutput
 	for k, r := range receive {
@@ -211,14 +138,12 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		txh.Value = common.Fixed64(value)
 		txh.Address = k
 		txh.Inputs = from
-		txh.TxType = tx_type
+		txh.TxType = txType
 		txh.Txid = tx.Hash()
 		txh.Height = 0
 		txh.Time = 0
 		txh.Type = []byte(transferType)
 		txh.Fee = realFee
-		//txh.NodeFee = uint64(node_fee)
-		//txh.NodeOutputIndex = uint64(node_output_index)
 		if len(rto) > 10 {
 			txh.Outputs = rto[0:10]
 		} else {
@@ -234,14 +159,12 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		txh.Value = common.Fixed64(r)
 		txh.Address = k
 		txh.Inputs = []common.Uint168{k}
-		txh.TxType = tx_type
+		txh.TxType = txType
 		txh.Txid = tx.Hash()
 		txh.Height = 0
 		txh.Time = 0
 		txh.Type = []byte(SENT)
 		txh.Fee = common.Fixed64(fee)
-		//txh.NodeFee = uint64(node_fee)
-		//txh.NodeOutputIndex = uint64(node_output_index)
 		if len(to) > 10 {
 			txh.Outputs = to[0:10]
 		} else {
