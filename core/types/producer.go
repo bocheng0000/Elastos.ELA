@@ -1,6 +1,6 @@
 package types
 
-type VoteInfo struct {
+type Vote_Info struct {
 	Producer_public_key string `json:",omitempty"`
 	Vote_type           string `json:",omitempty"`
 	Txid                string `json:",omitempty"`
@@ -11,13 +11,13 @@ type VoteInfo struct {
 	Block_time          int64  `json:",omitempty"`
 	Height              int64  `json:",omitempty"`
 	Rank                int64  `json:",omitempty"`
-	ProducerInfo        `json:",omitempty"`
+	Producer_Info        `json:",omitempty"`
 	Is_valid            string `json:",omitempty"`
 	Reward              string `json:",omitempty"`
 	EstRewardPerYear    string `json:",omitempty"`
 }
 
-type VoteStatisticHeader struct {
+type Vote_StatisticHeader struct {
 	Value      string   `json:",omitempty"`
 	Node_num   int      `json:",omitempty"`
 	Txid       string   `json:",omitempty"`
@@ -27,20 +27,20 @@ type VoteStatisticHeader struct {
 	Is_valid   string   `json:",omitempty"`
 }
 
-type VoteStatistic struct {
-	Vote_Header VoteStatisticHeader `json:",omitempty"`
-	Vote_Body   []VoteInfo          `json:",omitempty"`
+type Vote_Statistic struct {
+	Vote_Header Vote_StatisticHeader `json:",omitempty"`
+	Vote_Body   []Vote_Info         `json:",omitempty"`
 }
 
-type VoteStatisticsorter []VoteStatistic
+type Vote_Statisticsorter []Vote_Statistic
 
-func (a VoteStatisticsorter) Len() int      { return len(a) }
-func (a VoteStatisticsorter) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a VoteStatisticsorter) Less(i, j int) bool {
+func (a Vote_Statisticsorter) Len() int      { return len(a) }
+func (a Vote_Statisticsorter) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a Vote_Statisticsorter) Less(i, j int) bool {
 	return a[i].Vote_Header.Height > a[j].Vote_Header.Height
 }
 
-type ProducerInfo struct {
+type Producer_Info struct {
 	OwnerPublickey string
 	NodePublickey  string
 	Nickname       string

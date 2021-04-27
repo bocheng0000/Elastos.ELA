@@ -2225,12 +2225,12 @@ func VoteStatus(param Params) map[string]interface{} {
 		}
 	}
 
-	type voteInfo struct {
+	type votingInfo struct {
 		Total   string `json:"total"`
 		Voting  string `json:"voting"`
 		Pending bool   `json:"pending"`
 	}
-	return ResponsePack(Success, &voteInfo{
+	return ResponsePack(Success, &votingInfo{
 		Total:   total.String(),
 		Voting:  voting.String(),
 		Pending: pending,
