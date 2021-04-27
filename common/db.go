@@ -121,7 +121,6 @@ func (d *Dba) ToFloat(sql string) (float64, error) {
 	return -1, err
 }
 
-//
 func (d *Dba) ToString(sql string) (string, error) {
 
 	l, err := d.Qu(sql)
