@@ -100,7 +100,6 @@ func (th *TransactionHistory) Serialize(w io.Writer) error {
 	if err != nil {
 		return errors.New("[TransactionHistory], Type serialize failed.")
 	}
-	//err = common.WriteUint64(w, th.Amount)
 	err = th.Value.Serialize(w)
 	if err != nil {
 		return errors.New("[TransactionHistory], Amount serialize failed.")
@@ -113,7 +112,6 @@ func (th *TransactionHistory) Serialize(w io.Writer) error {
 	if err != nil {
 		return errors.New("[TransactionHistory], Height serialize failed.")
 	}
-	//err = common.WriteUint64(w, th.Fee)
 	err = th.Fee.Serialize(w)
 	if err != nil {
 		return errors.New("[TransactionHistory], Fee serialize failed.")

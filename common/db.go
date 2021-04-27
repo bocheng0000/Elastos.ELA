@@ -157,14 +157,12 @@ func InitDb(db *Dba) error {
 
 	r, err := db.Query(`SELECT name FROM sqlite_master WHERE name=?`, "chain_cr_candidate_info")
 	if err != nil {
-		//log.Fatalf("Error Init db %s", err.Error())
 		return err
 	}
 	if !r.Next() {
 		for _, v := range createTableSqlStmtArr {
 			_, err := db.Exec(v)
 			if err != nil {
-				//log.Infof("Error execute sql : %s \n", err.Error())
 				return err
 			}
 		}

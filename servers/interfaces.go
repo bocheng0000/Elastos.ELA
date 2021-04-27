@@ -2687,7 +2687,6 @@ type RPCTransaction struct {
 }
 
 type RPCTransactionHistoryInfo struct {
-	//TxSlice    []RPCTransaction `json:"txs"`
 	TxHistory  interface{} `json:"txhistory"`
 	TotalCount uint64      `json:"totalcount"`
 }
@@ -2702,10 +2701,7 @@ func GetHistory(param Params) map[string]interface{} {
 	if err != nil {
 		return ResponsePack(InvalidParams, "invalid address, "+err.Error())
 	}
-	//支持参数:	order: 查询顺序，默认值为desc降序,asc升序: desc降序
-	//		 	start: 开始位置，默认值为0，即从最新的记录开始
-	//			limit: 查询数量，默认值为10，最大值为100
-	//          verbose: 是否返回交易详情，默认为true；先实现verbose=true的情况
+
 	order, ok := param.String("order")
 	if ok {
 		if order != "asc" && order != "desc" {
@@ -2725,39 +2721,6 @@ func GetHistory(param Params) map[string]interface{} {
 		return ResponsePack(InvalidParams, "invalid limit")
 	}
 
-	//暂不考虑版本
-	//ver, _ := param.String("version")
-	//if !ok && !ok1 {
-	//	txhs := blockchain.DefaultChainStoreEx.GetTxHistory(addr, order, ver)
-	//	var len int
-	//	switch txhs.(type) {
-	//	case TransactionHistorySorter:
-	//		len = txhs.(types.TransactionHistorySorter).Len()
-	//	case TransactionHistorySorterDesc:
-	//		len = txhs.(types.TransactionHistorySorterDesc).Len()
-	//	}
-	//	thr := types.ThResult{
-	//		History:  txhs,
-	//		TotalNum: len,
-	//	}
-	//	return ResponsePackEx(ELEPHANT_SUCCESS, thr)
-	//} else if ok && ok1 {
-	//	pageNum, cool := param.Uint("pageNum")
-	//	if !cool {
-	//		return ResponsePackEx(ELEPHANT_ERR_BAD_REQUEST, "")
-	//	}
-	//	pageSize, cool := param.Uint("pageSize")
-	//	if !cool {
-	//		return ResponsePackEx(ELEPHANT_ERR_BAD_REQUEST, "")
-	//	}
-	//	txhs, total := blockchain2.DefaultChainStoreEx.GetTxHistoryByLimit(addr, order, ver, pageNum, pageSize)
-	//	thr := types.ThResult{
-	//		History:  txhs,
-	//		TotalNum: total,
-	//	}
-	//	return ResponsePackEx(ELEPHANT_SUCCESS, thr)
-	//}
-	//return ResponsePackEx(ELEPHANT_ERR_BAD_REQUEST, "")
 	txHistory, txCount := blockchain.StoreEx.GetTxHistoryByLimit(address, order, skip, limit)
 
 	result := RPCTransactionHistoryInfo{

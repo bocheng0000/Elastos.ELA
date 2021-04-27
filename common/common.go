@@ -99,25 +99,8 @@ func ReverseHexString(s string) (string, error) {
 	return BytesToHexString(b), nil
 }
 
-//func GetProgramHash(public []byte) (*Uint168, error) {
-//	hash, err := contract.PublicKeyToStandardProgramHash(public)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return hash, nil
-//}
-
-//func GetAddress(public []byte) (string, error) {
-//	hash, err := GetProgramHash(public)
-//	if err != nil {
-//		return "", err
-//	}
-//	return hash.ToAddress()
-//}
-
 func ContainsU168(c Uint168, s []Uint168) bool {
 	for _, v := range s {
-		//if v == c {
 		if v.IsEqual(c) {
 			return true
 		}

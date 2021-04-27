@@ -321,7 +321,6 @@ func NewChainStoreEx(chain *BlockChain, chainstore IChainStore, filePath string)
 			if ok {
 				go StoreEx.AddTask(b)
 			}
-		//	TODO：是否需要维护第二个交易池交易列表？
 		case events.ETTransactionAccepted:
 			tx, ok := e.Data.(*Transaction)
 			if ok {
