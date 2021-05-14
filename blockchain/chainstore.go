@@ -671,7 +671,7 @@ func (c *ChainStoreExtend) loop() {
 	}
 }
 
-func (c *ChainStoreExtend) GetTxHistory(addr string, order string) interface{} {
+func (c *ChainStoreExtend) GetTxHistory(addr string, order string, timestamp uint64) interface{} {
 	key := new(bytes.Buffer)
 	key.WriteByte(byte(DataTxHistoryPrefix))
 	var txhs interface{}
@@ -707,10 +707,12 @@ func (c *ChainStoreExtend) GetTxHistory(addr string, order string) interface{} {
 
 		txhd.TxType = strings.ToLower(txhd.TxType)
 
-		if order == "desc" {
-			txhs = append(txhs.(TransactionHistorySorterDesc), *txhd)
-		} else {
-			txhs = append(txhs.(TransactionHistorySorter), *txhd)
+		if (timestamp > 0 && txhd.Time > timestamp) || timestamp == 0 {
+			if order == "desc" {
+				txhs = append(txhs.(TransactionHistorySorterDesc), *txhd)
+			} else {
+				txhs = append(txhs.(TransactionHistorySorter), *txhd)
+			}
 		}
 	}
 
@@ -733,8 +735,8 @@ func (c *ChainStoreExtend) GetTxHistory(addr string, order string) interface{} {
 	return txhs
 }
 
-func (c *ChainStoreExtend) GetTxHistoryByLimit(addr, order string, skip, limit uint32) (interface{}, int) {
-	txhs := c.GetTxHistory(addr, order)
+func (c *ChainStoreExtend) GetTxHistoryByLimit(addr, order string, skip, limit, timestamp uint32) (interface{}, int) {
+	txhs := c.GetTxHistory(addr, order, uint64(timestamp))
 	if order == "desc" {
 		return txhs.(TransactionHistorySorterDesc).Filter(skip, limit), len(txhs.(TransactionHistorySorterDesc))
 	} else {

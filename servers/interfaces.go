@@ -3031,8 +3031,12 @@ func GetHistory(param Params) map[string]interface{} {
 	} else if limit > 50 {
 		return ResponsePack(InvalidParams, "invalid limit")
 	}
+	timestamp, ok := param.Uint("timestamp")
+	if !ok {
+		timestamp = 0
+	}
 
-	txHistory, txCount := blockchain.StoreEx.GetTxHistoryByLimit(address, order, skip, limit)
+	txHistory, txCount := blockchain.StoreEx.GetTxHistoryByLimit(address, order, skip, limit, timestamp)
 
 	result := RPCTransactionHistoryInfo{
 		TxHistory:  txHistory,

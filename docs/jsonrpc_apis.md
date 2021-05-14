@@ -583,12 +583,13 @@ Get the transaction history of given address
 
 #### Parameter
 
-| name    | type                             | description                               |
-| ------- | -------------------------------- | ----------------------------------------- |
-| address | string                           | address                                   |
-| order   | string, optional, default=desc   | query order                               |
-| skip    | int, optional, default=0         | the skip count of the transaction record  |
-| limit   | int, optional, default=10,max=50 | the limit count of the transaction record |
+| name        | type                             | description                                          |
+| ----------- | -------------------------------- | ---------------------------------------------------- |
+| address     | string                           | address                                              |
+| order       | string, optional, default=desc   | query order                                          |
+| skip        | int, optional, default=0         | the skip count of the transaction record             |
+| limit       | int, optional, default=10,max=50 | the limit count of the transaction record            |
+| timestamp   | int, optional, default=0         | the transaction after the timestamp will be returned |
 
 #### Example
 

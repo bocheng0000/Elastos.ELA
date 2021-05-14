@@ -52,8 +52,8 @@ type IChainStoreExtend interface {
 	persistTxHistory(block *Block) error
 	CloseEx()
 	AddTask(task interface{})
-	GetTxHistory(addr, order string) interface{}
-	GetTxHistoryByLimit(addr, order string, skip, limit uint32) (interface{}, int)
+	GetTxHistory(addr, order string, timestamp uint64) interface{}
+	GetTxHistoryByLimit(addr, order string, skip, limit, timestamp uint32) (interface{}, int)
 	LockDposData()
 	UnlockDposData()
 }
