@@ -82,7 +82,7 @@ type TransactionHistoryDisplay struct {
 	Fee     string   `json:"fee"`
 	Inputs  []string `json:"inputs"`
 	Outputs []string `json:"outputs"`
-	TxType  string   `json:"txtype"`
+	TxType  TxType   `json:"txtype"`
 	Memo    string   `json:"memo"`
 	Status  string   `json:",omitempty"`
 }
@@ -228,7 +228,7 @@ func (th *TransactionHistory) Deserialize(r io.Reader) (*TransactionHistoryDispl
 		return txhd, errors.New("[TransactionHistory], TxType serialize failed.")
 	}
 	th.TxType = TxType(txt[0])
-	txhd.TxType = TxTypeEnum[th.TxType]
+	txhd.TxType = th.TxType
 	th.Memo, err = common.ReadVarBytes(r, common.MaxVarStringLength, "memo")
 	txhd.Memo = string(th.Memo)
 	if err != nil {

@@ -705,8 +705,6 @@ func (c *ChainStoreExtend) GetTxHistory(addr string, order string, timestamp uin
 			}
 		}
 
-		txhd.TxType = strings.ToLower(txhd.TxType)
-
 		if (timestamp > 0 && txhd.Time > timestamp) || timestamp == 0 {
 			if order == "desc" {
 				txhs = append(txhs.(TransactionHistorySorterDesc), *txhd)
@@ -718,8 +716,6 @@ func (c *ChainStoreExtend) GetTxHistory(addr string, order string, timestamp uin
 
 	txInMempool := MemPoolEx.GetMemPoolTx(programHash)
 	for _, txh := range txInMempool {
-		txh.TxType = strings.ToLower(txh.TxType)
-
 		if order == "desc" {
 			txhs = append(txhs.(TransactionHistorySorterDesc), txh)
 		} else {
