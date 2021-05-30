@@ -533,9 +533,9 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					totalInput += int64(referTx.Outputs[index].Value)
 					v, ok := spend[address]
 					if ok {
-						spend[address] = v + Fixed64(referTx.Outputs[index].Value)
+						spend[address] = v + referTx.Outputs[index].Value
 					} else {
-						spend[address] = Fixed64(referTx.Outputs[index].Value)
+						spend[address] = referTx.Outputs[index].Value
 					}
 					if !ContainsU168(address, fromAddress) {
 						fromAddress = append(fromAddress, address)
@@ -559,9 +559,9 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					}
 					v, ok := receive[output.ProgramHash]
 					if ok {
-						receive[output.ProgramHash] = v + Fixed64(output.Value)
+						receive[output.ProgramHash] = v + output.Value
 					} else {
-						receive[output.ProgramHash] = Fixed64(output.Value)
+						receive[output.ProgramHash] = output.Value
 					}
 					if !ContainsU168(output.ProgramHash, toAddress) {
 						toAddress = append(toAddress, output.ProgramHash)
