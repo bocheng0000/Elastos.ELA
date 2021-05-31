@@ -49,14 +49,8 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 	if txType == TransferCrossChainAsset {
 		isCrossTx = true
 	}
-	judge := m.isVoteTx(tx)
-	if judge == 1 {
-		txType = DPoS
-	} else if judge == 2 {
-		txType = CRC
-	} else if judge == 3 {
-		txType = DPoSAndCRC
-	}
+	voteType := m.isVoteTx(tx)
+
 	spend := make(map[common.Uint168]int64)
 	var totalInput int64 = 0
 	var from []common.Uint168
@@ -139,6 +133,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		txh.Address = k
 		txh.Inputs = from
 		txh.TxType = txType
+		txh.VoteType = voteType
 		txh.Txid = tx.Hash()
 		txh.Height = 0
 		txh.Time = 0
@@ -160,6 +155,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 		txh.Address = k
 		txh.Inputs = []common.Uint168{k}
 		txh.TxType = txType
+		txh.VoteType = voteType
 		txh.Txid = tx.Hash()
 		txh.Height = 0
 		txh.Time = 0
@@ -187,35 +183,28 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 	return nil
 }
 
-func (m *MemPool) isVoteTx(tx *Transaction) (vt int) {
+func (m *MemPool) isVoteTx(tx *Transaction) (vt VoteType) {
 	version := tx.Version
 	if version == 0x09 {
 		vout := tx.Outputs
 		for _, v := range vout {
 			if v.Type == 0x01 && v.AssetID == *ELA_ASSET {
-				payload, ok := v.Payload.(*outputpayload.VoteOutput)
-				if !ok || payload == nil {
+				outputPayload, ok := v.Payload.(*outputpayload.VoteOutput)
+				if !ok || outputPayload == nil {
 					continue
 				}
-				contents := payload.Contents
+				contents := outputPayload.Contents
 				for _, cv := range contents {
 					votetype := cv.VoteType
-					if votetype == 0x00 {
-						if vt != 3 {
-							if vt == 2 {
-								vt = 3
-							} else if vt == 0 {
-								vt = 1
-							}
-						}
-					} else if votetype == 0x01 {
-						if vt != 3 {
-							if vt == 1 {
-								vt = 3
-							} else if vt == 0 {
-								vt = 2
-							}
-						}
+					switch votetype {
+					case 0x00:
+						vt = vt | DPoS
+					case 0x01:
+						vt = vt | CRC
+					case 0x02:
+						vt = vt | Proposal
+					case 0x03:
+						vt = vt | Impeachment
 					}
 				}
 			}

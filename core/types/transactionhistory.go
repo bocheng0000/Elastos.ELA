@@ -9,10 +9,13 @@ import (
 	"github.com/elastos/Elastos.ELA/common"
 )
 
+type VoteType byte
+
 const (
-	DPoS       TxType = 0x90
-	CRC        TxType = 0x91
-	DPoSAndCRC TxType = 0x92
+	DPoS        VoteType = 0x01
+	CRC         VoteType = 0x02
+	Proposal    VoteType = 0x04
+	Impeachment VoteType = 0x08
 )
 
 var TxTypeEnum = map[TxType]string{
@@ -25,9 +28,6 @@ var TxTypeEnum = map[TxType]string{
 	RechargeToSideChain:     "RechargeToSideChain",
 	WithdrawFromSideChain:   "WithdrawFromSideChain",
 	TransferCrossChainAsset: "TransferCrossChainAsset",
-	DPoS:                    "DPoS",
-	CRC:                     "CRC",
-	DPoSAndCRC:              "DPoSAndCRC",
 	RegisterProducer:        "RegisterProducer",
 	CancelProducer:          "CancelProducer",
 	UpdateProducer:          "UpdateProducer",
@@ -58,33 +58,35 @@ var TxTypeEnum = map[TxType]string{
 }
 
 type TransactionHistory struct {
-	Address common.Uint168
-	Txid    common.Uint256
-	Type    []byte
-	Value   common.Fixed64
-	Time    uint64
-	Height  uint64
-	Fee     common.Fixed64
-	Inputs  []common.Uint168
-	Outputs []common.Uint168
-	TxType  TxType
-	Memo    []byte
-	Status  uint64
+	Address  common.Uint168
+	Txid     common.Uint256
+	Type     []byte
+	Value    common.Fixed64
+	Time     uint64
+	Height   uint64
+	Fee      common.Fixed64
+	Inputs   []common.Uint168
+	Outputs  []common.Uint168
+	TxType   TxType
+	VoteType VoteType
+	Memo     []byte
+	Status   uint64
 }
 
 type TransactionHistoryDisplay struct {
-	Address string   `json:"address"`
-	Txid    string   `json:"txid"`
-	Type    string   `json:"type"`
-	Value   string   `json:"value"`
-	Time    uint64   `json:"time"`
-	Height  uint64   `json:"height"`
-	Fee     string   `json:"fee"`
-	Inputs  []string `json:"inputs"`
-	Outputs []string `json:"outputs"`
-	TxType  TxType   `json:"txtype"`
-	Memo    string   `json:"memo"`
-	Status  string   `json:",omitempty"`
+	Address  string   `json:"address"`
+	Txid     string   `json:"txid"`
+	Type     string   `json:"type"`
+	Value    string   `json:"value"`
+	Time     uint64   `json:"time"`
+	Height   uint64   `json:"height"`
+	Fee      string   `json:"fee"`
+	Inputs   []string `json:"inputs"`
+	Outputs  []string `json:"outputs"`
+	TxType   TxType   `json:"txtype"`
+	VoteType VoteType `json:"votetype"`
+	Memo     string   `json:"memo"`
+	Status   string   `json:",omitempty"`
 }
 
 func (th *TransactionHistory) Serialize(w io.Writer) error {
@@ -139,6 +141,10 @@ func (th *TransactionHistory) Serialize(w io.Writer) error {
 	err = common.WriteVarBytes(w, []byte{byte(th.TxType)})
 	if err != nil {
 		return errors.New("[TransactionHistory], TxType serialize failed.")
+	}
+	err = common.WriteVarBytes(w, []byte{byte(th.VoteType)})
+	if err != nil {
+		return errors.New("[TransactionHistory], VoteType serialize failed.")
 	}
 	err = common.WriteVarBytes(w, th.Memo)
 	if err != nil {
@@ -223,12 +229,18 @@ func (th *TransactionHistory) Deserialize(r io.Reader) (*TransactionHistoryDispl
 		addr, _ := programHash.ToAddress()
 		txhd.Outputs = append(txhd.Outputs, addr)
 	}
-	txt, err := common.ReadVarBytes(r, 1, "TxType")
+	content, err := common.ReadVarBytes(r, 1, "TxType")
 	if err != nil {
 		return txhd, errors.New("[TransactionHistory], TxType serialize failed.")
 	}
-	th.TxType = TxType(txt[0])
+	th.TxType = TxType(content[0])
 	txhd.TxType = th.TxType
+	content, err = common.ReadVarBytes(r, 1, "VoteType")
+	if err != nil {
+		return txhd, errors.New("[TransactionHistory], VoteType serialize failed.")
+	}
+	th.VoteType = VoteType(content[0])
+	txhd.VoteType = th.VoteType
 	th.Memo, err = common.ReadVarBytes(r, common.MaxVarStringLength, "memo")
 	txhd.Memo = string(th.Memo)
 	if err != nil {

@@ -339,7 +339,7 @@ func (c *ChainStoreExtend) Close() {
 
 }
 
-func (c *ChainStoreExtend) processVote(block *Block, voteTxHolder *map[string]TxType) error {
+func (c *ChainStoreExtend) processVote(block *Block, voteTxHolder *map[string]VoteType) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	bestHeight, _ := c.GetBestHeightExt()
@@ -355,12 +355,12 @@ func (c *ChainStoreExtend) processVote(block *Block, voteTxHolder *map[string]Tx
 	return nil
 }
 
-func doProcessVote(block *Block, voteTxHolder *map[string]TxType) error {
+func doProcessVote(block *Block, voteTxHolder *map[string]VoteType) error {
 	for i := 0; i < len(block.Transactions); i++ {
 		tx := block.Transactions[i]
 		version := tx.Version
 		txid, err := ReverseHexString(tx.Hash().String())
-		vt := 0
+		vt := VoteType(0x00)
 		if err != nil {
 			return err
 		}
@@ -368,11 +368,11 @@ func doProcessVote(block *Block, voteTxHolder *map[string]TxType) error {
 			vout := tx.Outputs
 			for _, v := range vout {
 				if v.Type == 0x01 && v.AssetID == *ELA_ASSET {
-					payload, ok := v.Payload.(*outputpayload.VoteOutput)
-					if !ok || payload == nil {
+					outputPayload, ok := v.Payload.(*outputpayload.VoteOutput)
+					if !ok || outputPayload == nil {
 						continue
 					}
-					contents := payload.Contents
+					contents := outputPayload.Contents
 					for _, cv := range contents {
 						votetype := cv.VoteType
 						votetypeStr := ""
@@ -380,27 +380,24 @@ func doProcessVote(block *Block, voteTxHolder *map[string]TxType) error {
 							votetypeStr = "Delegate"
 						} else if votetype == 0x01 {
 							votetypeStr = "CRC"
+						} else if votetype == 0x02 {
+							votetypeStr = "CRCProposal"
+						} else if votetype == 0x03 {
+							votetypeStr = "CRCImpeachment"
 						} else {
 							continue
 						}
 
-						for _, _ = range cv.CandidateVotes {
-							if votetypeStr == "Delegate" {
-								if vt != 3 {
-									if vt == 2 {
-										vt = 3
-									} else if vt == 0 {
-										vt = 1
-									}
-								}
-							} else {
-								if vt != 3 {
-									if vt == 1 {
-										vt = 3
-									} else if vt == 0 {
-										vt = 2
-									}
-								}
+						if len(cv.CandidateVotes) > 0 {
+							switch votetypeStr {
+							case "Delegate":
+								vt = vt | DPoS
+							case "CRC":
+								vt = vt | CRC
+							case "CRCProposal":
+								vt = vt | Proposal
+							case "CRCImpeachment":
+								vt = vt | Impeachment
 							}
 						}
 					}
@@ -408,14 +405,7 @@ func doProcessVote(block *Block, voteTxHolder *map[string]TxType) error {
 			}
 		}
 
-		if vt == 1 {
-			(*voteTxHolder)[txid] = DPoS
-		} else if vt == 2 {
-			(*voteTxHolder)[txid] = CRC
-		} else if vt == 3 {
-			(*voteTxHolder)[txid] = DPoSAndCRC
-		}
-
+		(*voteTxHolder)[txid] = vt
 	}
 	return nil
 }
@@ -458,7 +448,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 			continue
 		}
 
-		voteTxHolder := make(map[string]TxType)
+		voteTxHolder := make(map[string]VoteType)
 		err = c.processVote(block, &voteTxHolder)
 		if err != nil {
 			return err
@@ -515,9 +505,10 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 				if txType == TransferCrossChainAsset {
 					isCrossTx = true
 				}
-				if voteTxHolder[txid] == DPoS || voteTxHolder[txid] == CRC || voteTxHolder[txid] == DPoSAndCRC {
-					txType = voteTxHolder[txid]
-				}
+				//if voteTxHolder[txid] == DPoS || voteTxHolder[txid] == CRC || voteTxHolder[txid] == DPoSAndCRC {
+				//	txType = voteTxHolder[txid]
+				//}
+				voteType := voteTxHolder[txid]
 				spend := make(map[Uint168]Fixed64)
 				var totalInput int64 = 0
 				var fromAddress []Uint168
@@ -603,6 +594,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					txh.Height = uint64(block.Height)
 					txh.Time = uint64(block.Header.Timestamp)
 					txh.Type = []byte(transferType)
+					txh.VoteType = voteType
 					txh.Fee = Fixed64(realFee)
 					if len(txOutput) > 10 {
 						txh.Outputs = txOutput[0:10]
@@ -619,6 +611,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 					txh.Address = addr
 					txh.Inputs = []Uint168{addr}
 					txh.TxType = txType
+					txh.VoteType = voteType
 					txh.Txid = tx.Hash()
 					txh.Height = uint64(block.Height)
 					txh.Time = uint64(block.Header.Timestamp)
