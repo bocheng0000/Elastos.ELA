@@ -26,8 +26,6 @@ import (
 	_ "github.com/elastos/Elastos.ELA/database/ffldb"
 	"github.com/elastos/Elastos.ELA/events"
 	"github.com/elastos/Elastos.ELA/utils"
-
-	"github.com/robfig/cron"
 )
 
 const (
@@ -262,7 +260,6 @@ func (c *ChainStore) SetHeight(height uint32) {
 var (
 	MINING_ADDR  = Uint168{}
 	ELA_ASSET, _ = Uint256FromHexString("b037db964a231458d2d6ffd5ea18944c4f90e63d547c5d3b9874df66a4ead0a3")
-	DBA          *Dba
 )
 
 type ChainStoreExtend struct {
@@ -272,7 +269,6 @@ type ChainStoreExtend struct {
 	taskChEx chan interface{}
 	quitEx   chan chan bool
 	mu       sync.RWMutex
-	*cron.Cron
 	rp         chan bool
 	checkPoint bool
 }
@@ -289,23 +285,13 @@ func NewChainStoreEx(chain *BlockChain, chainstore IChainStore, filePath string)
 	if err != nil {
 		return nil, err
 	}
-	DBA, err = NewInstance(filePath)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-	err = InitDb(DBA)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
+
 	c := &ChainStoreExtend{
 		IChainStore: chainstore,
 		IStore:      st,
 		chain:       chain,
 		taskChEx:    make(chan interface{}, 100),
 		quitEx:      make(chan chan bool, 1),
-		Cron:        cron.New(),
 		mu:          sync.RWMutex{},
 		rp:          make(chan bool, 1),
 		checkPoint:  true,
@@ -317,7 +303,7 @@ func NewChainStoreEx(chain *BlockChain, chainstore IChainStore, filePath string)
 		p:    make(map[string][]byte),
 	}
 	go c.loop()
-	go c.initTask()
+
 	events.Subscribe(func(e *events.Event) {
 		switch e.Type {
 		case events.ETBlockConnected:
@@ -637,7 +623,6 @@ func (c *ChainStoreExtend) CloseEx() {
 	closed := make(chan bool)
 	c.quitEx <- closed
 	<-closed
-	c.Stop()
 	log.Info("Extend chainStore shutting down")
 }
 

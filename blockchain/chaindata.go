@@ -110,11 +110,3 @@ func (c ChainStoreExtend) doPersistTransactionHistory(i uint64, history types.Tr
 	return nil
 }
 
-func (c ChainStoreExtend) initTask() {
-	c.AddFunc("@every 2m", func() {
-		if len(c.rp) == 0 {
-			c.rp <- true
-		}
-	})
-	c.Start()
-}
