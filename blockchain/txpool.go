@@ -183,7 +183,7 @@ func (m *MemPool) AppendToMemPool(tx *Transaction) error {
 	return nil
 }
 
-func (m *MemPool) isVoteTx(tx *Transaction) (vt VoteType) {
+func (m *MemPool) isVoteTx(tx *Transaction) (vt VoteCategory) {
 	version := tx.Version
 	if version == 0x09 {
 		vout := tx.Outputs

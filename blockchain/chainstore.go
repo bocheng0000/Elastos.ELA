@@ -325,7 +325,7 @@ func (c *ChainStoreExtend) Close() {
 
 }
 
-func (c *ChainStoreExtend) processVote(block *Block, voteTxHolder *map[string]VoteType) error {
+func (c *ChainStoreExtend) processVote(block *Block, voteTxHolder *map[string]VoteCategory) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	bestHeight, _ := c.GetBestHeightExt()
@@ -341,12 +341,12 @@ func (c *ChainStoreExtend) processVote(block *Block, voteTxHolder *map[string]Vo
 	return nil
 }
 
-func doProcessVote(block *Block, voteTxHolder *map[string]VoteType) error {
+func doProcessVote(block *Block, voteTxHolder *map[string]VoteCategory) error {
 	for i := 0; i < len(block.Transactions); i++ {
 		tx := block.Transactions[i]
 		version := tx.Version
 		txid, err := ReverseHexString(tx.Hash().String())
-		vt := VoteType(0x00)
+		vt := VoteCategory(0x00)
 		if err != nil {
 			return err
 		}
@@ -434,7 +434,7 @@ func (c *ChainStoreExtend) persistTxHistory(blk *Block) error {
 			continue
 		}
 
-		voteTxHolder := make(map[string]VoteType)
+		voteTxHolder := make(map[string]VoteCategory)
 		err = c.processVote(block, &voteTxHolder)
 		if err != nil {
 			return err

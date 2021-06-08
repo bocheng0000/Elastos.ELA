@@ -9,13 +9,13 @@ import (
 	"github.com/elastos/Elastos.ELA/common"
 )
 
-type VoteType byte
+type VoteCategory byte
 
 const (
-	DPoS        VoteType = 0x01
-	CRC         VoteType = 0x02
-	Proposal    VoteType = 0x04
-	Impeachment VoteType = 0x08
+	DPoS        VoteCategory = 0x01
+	CRC         VoteCategory = 0x02
+	Proposal    VoteCategory = 0x04
+	Impeachment VoteCategory = 0x08
 )
 
 var TxTypeEnum = map[TxType]string{
@@ -68,25 +68,25 @@ type TransactionHistory struct {
 	Inputs   []common.Uint168
 	Outputs  []common.Uint168
 	TxType   TxType
-	VoteType VoteType
+	VoteType VoteCategory
 	Memo     []byte
 	Status   uint64
 }
 
 type TransactionHistoryDisplay struct {
-	Address  string   `json:"address"`
-	Txid     string   `json:"txid"`
-	Type     string   `json:"type"`
-	Value    string   `json:"value"`
-	Time     uint64   `json:"time"`
-	Height   uint64   `json:"height"`
-	Fee      string   `json:"fee"`
-	Inputs   []string `json:"inputs"`
-	Outputs  []string `json:"outputs"`
-	TxType   TxType   `json:"txtype"`
-	VoteType VoteType `json:"votetype"`
-	Memo     string   `json:"memo"`
-	Status   string   `json:",omitempty"`
+	Address  string       `json:"address"`
+	Txid     string       `json:"txid"`
+	Type     string       `json:"type"`
+	Value    string       `json:"value"`
+	Time     uint64       `json:"time"`
+	Height   uint64       `json:"height"`
+	Fee      string       `json:"fee"`
+	Inputs   []string     `json:"inputs"`
+	Outputs  []string     `json:"outputs"`
+	TxType   TxType       `json:"txtype"`
+	VoteType VoteCategory `json:"votecategory"`
+	Memo     string       `json:"memo"`
+	Status   string       `json:",omitempty"`
 }
 
 func (th *TransactionHistory) Serialize(w io.Writer) error {
@@ -144,7 +144,7 @@ func (th *TransactionHistory) Serialize(w io.Writer) error {
 	}
 	err = common.WriteVarBytes(w, []byte{byte(th.VoteType)})
 	if err != nil {
-		return errors.New("[TransactionHistory], VoteType serialize failed.")
+		return errors.New("[TransactionHistory], VoteCategory serialize failed.")
 	}
 	err = common.WriteVarBytes(w, th.Memo)
 	if err != nil {
@@ -235,11 +235,11 @@ func (th *TransactionHistory) Deserialize(r io.Reader) (*TransactionHistoryDispl
 	}
 	th.TxType = TxType(content[0])
 	txhd.TxType = th.TxType
-	content, err = common.ReadVarBytes(r, 1, "VoteType")
+	content, err = common.ReadVarBytes(r, 1, "VoteCategory")
 	if err != nil {
-		return txhd, errors.New("[TransactionHistory], VoteType serialize failed.")
+		return txhd, errors.New("[TransactionHistory], VoteCategory serialize failed.")
 	}
-	th.VoteType = VoteType(content[0])
+	th.VoteType = VoteCategory(content[0])
 	txhd.VoteType = th.VoteType
 	th.Memo, err = common.ReadVarBytes(r, common.MaxVarStringLength, "memo")
 	txhd.Memo = string(th.Memo)
