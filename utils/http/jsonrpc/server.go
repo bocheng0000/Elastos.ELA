@@ -12,6 +12,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/rs/cors"
 	"io/ioutil"
 	"mime"
 	"net"
@@ -120,11 +121,15 @@ func (s *Server) Start() error {
 		return err
 	}
 
+	c :=cors.New(cors.Options{})
+	handler := c.Handler(s)
 
 	if s.cfg.Path == "" {
-		s.server = &http.Server{Handler: s}
+		//s.server = &http.Server{Handler: s}
+		s.server = &http.Server{Handler: handler}
 	} else {
-		http.Handle(s.cfg.Path, s)
+		//http.Handle(s.cfg.Path, s)
+		http.Handle(s.cfg.Path, handler)
 		s.server = &http.Server{}
 	}
 	return s.server.Serve(listener)
