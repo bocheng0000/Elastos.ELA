@@ -1178,6 +1178,10 @@ func ListUnspent(param Params) map[string]interface{} {
 			return ResponsePack(InvalidParams, "invalid utxotype")
 		}
 	}
+	spendable := false
+	if s, ok := param.Bool("spendable"); ok {
+		spendable = s
+	}
 	for _, address := range addresses {
 		programHash, err := common.Uint168FromAddress(address)
 		if err != nil {
@@ -1199,6 +1203,11 @@ func ListUnspent(param Params) map[string]interface{} {
 			}
 			if utxoType == "normal" && tx.Version >= TxVersion09 && tx.Outputs[utxo.Index].Type == OTVote {
 				continue
+			}
+			if spendable  && tx.IsCoinBaseTx() {
+				if bestHeight - height < ChainParams.CoinbaseMaturity {
+					continue
+				}
 			}
 			if utxo.Value == 0 {
 				continue
