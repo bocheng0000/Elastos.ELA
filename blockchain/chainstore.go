@@ -33,7 +33,7 @@ const (
 	SENT                        string = "sent"
 	MOVED                       string = "moved"
 	ELA                         uint64 = 100000000
-	DPOS_CHECK_POINT                   = 290000
+	DPOS_CHECK_POINT                   = 100
 	CHECK_POINT_ROLLBACK_HEIGHT        = 100
 )
 
